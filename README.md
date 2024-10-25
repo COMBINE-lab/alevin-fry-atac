@@ -24,6 +24,7 @@ While we provide below individually a list of steps to run `alevin-fry-atac` to 
 ```
     git clone https://github.com/COMBINE-lab/alevin-fry.git -b dev-atac
     cd alevin-fry
+    git branch ## check it is the dev-atac branch
     cargo build --release
 ```
 
@@ -65,3 +66,34 @@ Finally, the `-r` argument takes a list of `FASTA` format files containing the r
 
 > **Note**
 > You should ensure that the `-t` parameter is less than the number of physical cores that you have on your system. _Specifically_, if you are running on an Apple silicon machine, it is highly recommended that you set `-t` to be less than or equal to the number of **high performance** cores that you have (rather than the total number of cores including efficiency cores), as using efficiency cores in the `piscem build` step has been observed to severely degrade performance.
+
+### Mapping ATAC-Seq reads
+The executable for this task is `pesc-sc-atac` and can be found in the directory `piscem-cpp/build`.
+```
+Usage: pesc-ac-atac [OPTIONS] --index <IND> --read1 <READ1> --read2 <READ2> --barcode <BARCODE> --threads <THREADS> --output <OUTPUT>
+
+Options:
+  -h,--help                   Print this help message and exit
+  -i,--index TEXT REQUIRED    input index prefix
+  -1,--read1 TEXT ... REQUIRED
+                              path to list of read 1 files
+  -2,--read2 TEXT ...         path to list of read 2 files
+  -b,--barcode TEXT ... REQUIRED
+                              path to list of barcodes
+  -o,--output TEXT REQUIRED   path to output directory
+  -t,--threads UINT [16]      An integer that specifies the number of threads to use
+  --sam-format                Write SAM format output rather than bulk RAD.
+  --kmers-orphans             Check if any mapping kmer exist for a mate, if there exists mapping for the other read (default false)
+  --bed-format                Dump output to bed.
+  --use-chr                   use chromosomes as virtual color.
+  --tn5-shift BOOLEAN         Tn5 shift
+  --no-poison BOOLEAN [1]     Do not filter reads for poison k-mers, even if a poison table exists for the index
+  -c,--struct-constraints     Apply structural constraints when performing mapping
+  --skipping-strategy TEXT [permissive]
+                              Which skipping rule to use for pseudoalignment ({strict, permissive, strict})
+  --quiet                     Try to be quiet in terms of console output
+  --thr FLOAT [0.7]           threshold for psa
+  --bin-size UINT [1000]      size for binning
+  --bin-overlap UINT [300]    size for bin overlap
+  --check-ambig-hits          check the existence of highly-frequent hits in mapped targets, rather than ignoring them.
+```
