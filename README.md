@@ -34,6 +34,34 @@ In case you want to skip running each step individually. The instructions to dow
 ### Enumerating each step
 
 #### Building the index
+
+> **Note**
+> Since the build process makes use of [KMC3](https://github.com/refresh-bio/KMC) for a k-mer enumeration step, which, in turn, makes use of intermediate files to keep memory usage low, **you will likely need to increase the default number of file handles that can be open at once**.  Before running the `build` command, you can do this by running `ulimit -n 2048` in the terminal where you execute the `build` command.  You can also put this command in any script that you will use to run `piscem build`, or add it to your shell initalization scripts / profiles so that it is the default for new shells that you start
+
+---
+Index a reference sequence
 ```
-  
+Usage: piscem build [OPTIONS] --klen <KLEN> --mlen <MLEN> --threads <THREADS> --output <OUTPUT> <--ref-seqs <REF_SEQS>|--ref-lists <REF_LISTS>|--ref-dirs <REF_DIRS>>
+
+Options:
+  -s, --ref-seqs <REF_SEQS>    ',' separated list of reference FASTA files
+  -l, --ref-lists <REF_LISTS>  ',' separated list of files (each listing input FASTA files)
+  -d, --ref-dirs <REF_DIRS>    ',' separated list of directories (all FASTA files in each directory will be indexed, but not recursively)
+  -k, --klen <KLEN>            length of k-mer to use
+  -m, --mlen <MLEN>            length of minimizer to use
+  -t, --threads <THREADS>      number of threads to use
+  -o, --output <OUTPUT>        output file stem
+      --keep-intermediate-dbg  retain the reduced format GFA files produced by cuttlefish that describe the reference cDBG (the default is to remove these)
+  -w, --work-dir <WORK_DIR>    working directory where temporary files should be placed [default: .]
+      --overwrite              overwite an existing index if the output path is the same
+      --no-ec-table            skip the construction of the equivalence class lookup table when building the index
+  -h, --help                   Print help
+  -V, --version                Print version
 ```
+
+The parameters should be reasonably self-expalanatory.  The `-k` parameter is the k-mer size for the underlying colored compacted de Bruijn graph, and the `-m` parameter is the minimizer size used to build the [`sshash`](https://github.com/jermp/sshash) data structure.  The quiet `-q` flag applies to the `sshash` indexing step (not yet the CdBG construction step) and will prevent extra output being written to `stderr`.
+
+Finally, the `-r` argument takes a list of `FASTA` format files containing the references to be indexed.  Here, if there is more than one reference, they should be provided to `-r` in the form of a `,` separated list.  For example, if you wish to index `ref1.fa`, `ref2.fa`, `ref3.fa` then your invocation should include `-r ref1.fa,ref2.fa,ref3.fa`.  The references present within all of the `FASTA` files will be indexed by the `build` command.
+
+> **Note**
+> You should ensure that the `-t` parameter is less than the number of physical cores that you have on your system. _Specifically_, if you are running on an Apple silicon machine, it is highly recommended that you set `-t` to be less than or equal to the number of **high performance** cores that you have (rather than the total number of cores including efficiency cores), as using efficiency cores in the `piscem build` step has been observed to severely degrade performance.
