@@ -67,8 +67,9 @@ Finally, the `-r` argument takes a list of `FASTA` format files containing the r
 > **Note**
 > You should ensure that the `-t` parameter is less than the number of physical cores that you have on your system. _Specifically_, if you are running on an Apple silicon machine, it is highly recommended that you set `-t` to be less than or equal to the number of **high performance** cores that you have (rather than the total number of cores including efficiency cores), as using efficiency cores in the `piscem build` step has been observed to severely degrade performance.
 
-### Mapping ATAC-Seq reads
-The executable for this task is `pesc-sc-atac` and can be found in the directory `piscem-cpp/build`.
+#### Mapping ATAC-Seq reads
+---
+The executable for this task is `pesc-sc-atac` and can be found in the directory `piscem-cpp/build`. The default output is a RAD file.
 ```
 Usage: pesc-ac-atac [OPTIONS] --index <IND> --read1 <READ1> --read2 <READ2> --barcode <BARCODE> --threads <THREADS> --output <OUTPUT>
 
@@ -96,4 +97,55 @@ Options:
   --bin-size UINT [1000]      size for binning
   --bin-overlap UINT [300]    size for bin overlap
   --check-ambig-hits          check the existence of highly-frequent hits in mapped targets, rather than ignoring them.
+```
+All the arguments are self explanatory. It outputs the file `map.rad` in the `--output` directory.
+
+#### Barcode correction, Collate and Deduplicate
+---
+These steps are handled by `alevin-fry`. It starts with taking in the RAD file that contains the mapping information and producing a BED file with the mapped fragments. The executable is `alevin_fry_atac` under `alevin-fry/target/release` directory.
+```
+  Usage: alevin_fry_atac <COMMAND>
+  Commands:
+    generate-permit-list  Generate a permit list of barcodes from a whitelist file
+    collate               Collate a RAD file by corrected cell barcode
+    deduplicate           Deduplicate the RAD file and output a BED file
+    help                  Print this message or the help of the given subcommand(s)
+```
+##### Barcode correction
+```
+Usage:  alevin_fry_atac generate-permit-list --input <INPUT> --output-dir <OUTPUTDIR> <--unfiltered-pl <UNFILTEREDPL>>
+Options:
+  -i, --input <INPUT>                 input directory containing the map.rad file
+  -o, --output-dir <OUTPUTDIR>        output directory
+  -u, --unfiltered-pl <UNFILTEREDPL>  uses an unfiltered external permit list
+  -m, --min-reads <MINREADS>          minimum read count threshold; only used with --unfiltered-pl [default: 10]
+  -r, --rev-comp <REVERSECOMPLEMENT>  reverse complement the barcode [default: true] [possible values: true, false]
+  -h, --help                          Print help
+  -V, --version                       Print version
+```
+`unfiltered-pl` is the permit list of the barcodes which will be a superset of the barcodes in a sample
+`--rev-comp` Whether the reverse complement has to be taken before trying to find a matching between the barcode of a mapped record to that of the barcode in the whitelist file
+
+##### Collate
+```
+Usage: alevin_fry_atac collate --input-dir <INPUTDIR> --rad-dir <RADDIR>
+Options:
+  -i, --input-dir <INPUTDIR>      output directory made by `generate-permit-list`
+  -r, --rad-dir <RADDIR>          the directory containing the map.rad file which will be collated (typically produced as an output of the mapping)
+  -t, --threads <THREADS>         number of threads to use for processing [default: 8]
+  -c, --compress                  compress the output collated RAD file
+  -m, --max-records <MAXRECORDS>  the maximum number of read records to keep in memory at once [default: 30000000]
+  -h, --help                      Print help
+  -V, --version                   Print version
+```
+
+##### Deduplicate
+```
+Usage: alevin_fry_atac deduplicate --input-dir <INPUTDIR>
+Options:
+  -i, --input-dir <INPUTDIR>          input directory made by generate-permit-list that also contains the output of collate
+  -t, --threads <THREADS>             number of threads to use for processing [default: 8]
+  -r, --rev-comp <REVERSECOMPLEMENT>  reverse complement [default: true] [possible values: true, false]
+  -h, --help                          Print help
+  -V, --version                       Print version
 ```
