@@ -3,7 +3,7 @@ piscem_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/piscem_combine"
 piscem_atac_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/piscem-cpp-combine/build/pesc-sc-atac"
 
 ### dedup path
-afa_dedup_path: "/fs/nexus-projects/scATAC-seq/snake/bash_scripts/run_piscem_dedup.sh"
+afa_dedup_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/alevin-fry/target/release/alevin_fry_atac"
 
 ### Reference
 ref_genome: "/fs/nexus-projects/scATAC-seq/reference/GRCh38-2020-A-build/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
@@ -16,7 +16,7 @@ threads: 16
 threshold: 0.7
 bin_size: 1000
 permit_list_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/cellranger-atac-2.1.0/lib/python/atac/barcodes/737K-cratac-v1.txt"
-rev_comp: True
+rev_comp: true
 
 ### fastq files
 read1: "/fs/nexus-projects/scATAC-seq/data/10k_pbmc_ATACv2_nextgem_Chromium_Controller_fastqs/10k_pbmc_ATACv2_nextgem_Chromium_Controller_S3_L001_R1_001.fastq.gz"

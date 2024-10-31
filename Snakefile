@@ -91,10 +91,12 @@ rule run_afa_dedup:
         threads = threads,
         afa_dedup_path = config["afa_dedup_path"],
         permit_list_path = config["permit_list_path"],
+        piscem_exec_path = join(config["piscem_path"], "target", "release", "piscem"),
         rev_comp = config["rev_comp"]
     shell:
         """
-            ./bash_scripts/run_piscem_dedup.sh {params.afa_dedup_path} \
+		./bash_scripts/run_piscem_dedup.sh \
+            	{params.afa_dedup_path} \
                 {params.map_dir} {params.permit_list_path} \
                 {params.rev_comp} {params.threads} {params.map_dir}
         """

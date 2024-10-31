@@ -7,21 +7,20 @@ rev_comp=$4
 threads=$5
 output_path=$6
 
-echo "Correcting barcodes\n"
-/usr/bin/time -o $output_path/time_whitelist.txt $piscem_executable generate-permit-list \
+echo "Correcting barcodes"
+$piscem_executable generate-permit-list \
     --input $map_rad \
     --unfiltered-pl $whitelist_file \
     --rev-comp $rev_comp \
     --output-dir $output_path
 
-echo "Collation\n"
-/usr/bin/time -o $output_path/time_collate.txt $piscem_executable collate \
+echo "Collation"
+$piscem_executable collate \
     --input-dir $output_path \
     --rad-dir $output_path \
     --threads $threads
 
-echo "Deduplication\n"
-/usr/bin/time -o $output_path/time_deduplicate.txt $piscem_executable deduplicate \
+$piscem_executable deduplicate \
     --input-dir $output_path \
     --threads $threads \
     --rev-comp $rev_comp
