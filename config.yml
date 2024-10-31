@@ -1,0 +1,27 @@
+### Path to software
+piscem_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/piscem_combine"
+piscem_atac_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/piscem-cpp-combine/build/pesc-sc-atac"
+
+### dedup path
+afa_dedup_path: "/fs/nexus-projects/scATAC-seq/snake/bash_scripts/run_piscem_dedup.sh"
+
+### Reference
+ref_genome: "/fs/nexus-projects/scATAC-seq/reference/GRCh38-2020-A-build/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
+
+### Piscem parameters
+k: 25
+m: 17
+tmp_dir: "/scratch0"
+threads: 16
+threshold: 0.7
+bin_size: 1000
+permit_list_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/cellranger-atac-2.1.0/lib/python/atac/barcodes/737K-cratac-v1.txt"
+rev_comp: True
+
+### fastq files
+read1: "/fs/nexus-projects/scATAC-seq/data/10k_pbmc_ATACv2_nextgem_Chromium_Controller_fastqs/10k_pbmc_ATACv2_nextgem_Chromium_Controller_S3_L001_R1_001.fastq.gz"
+read2: "/fs/nexus-projects/scATAC-seq/data/10k_pbmc_ATACv2_nextgem_Chromium_Controller_fastqs/10k_pbmc_ATACv2_nextgem_Chromium_Controller_S3_L001_R3_001.fastq.gz"
+barcode: "/fs/nexus-projects/scATAC-seq/data/10k_pbmc_ATACv2_nextgem_Chromium_Controller_fastqs/10k_pbmc_ATACv2_nextgem_Chromium_Controller_S3_L001_R2_001.fastq.gz"
+
+### output
+out_path: "/fs/cbcb-scratch/npsingh/alevin_fry_atac_output"
