@@ -7,17 +7,12 @@ While we provide below individually a list of steps to run `alevin-fry-atac` to 
 
 ### Software to install
 
-#### Piscem (dev-atac branch)
+#### Piscem (dev branch)
 ```
-  git clone --recursive https://github.com/COMBINE-lab/piscem.git -b dev-atac
+  git clone --recursive https://github.com/COMBINE-lab/piscem.git -b dev
   cd piscem
-  git branch ## this should point to dev-atac
+  git branch ## this should point to dev
   cargo build --release
-  cd piscem-cpp
-  mkdir build
-  cd build
-  cmake ..
-  make
 ```
 
 #### alevin-fry-atac (dev-atac)
@@ -69,45 +64,48 @@ Finally, the `-r` argument takes a list of `FASTA` format files containing the r
 
 #### Mapping ATAC-Seq reads
 ---
-The executable for this task is `pesc-sc-atac` and can be found in the directory `piscem-cpp/build`. The default output is a RAD file.
 ```
-Usage: pesc-ac-atac [OPTIONS] --index <IND> --read1 <READ1> --read2 <READ2> --barcode <BARCODE> --threads <THREADS> --output <OUTPUT>
+Usage: piscem map-sc-atac [OPTIONS] --index <INDEX> --output <OUTPUT>
 
 Options:
-  -h,--help                   Print this help message and exit
-  -i,--index TEXT REQUIRED    input index prefix
-  -1,--read1 TEXT ... REQUIRED
-                              path to list of read 1 files
-  -2,--read2 TEXT ...         path to list of read 2 files
-  -b,--barcode TEXT ... REQUIRED
-                              path to list of barcodes
-  -o,--output TEXT REQUIRED   path to output directory
-  -t,--threads UINT [16]      An integer that specifies the number of threads to use
-  --sam-format                Write SAM format output rather than bulk RAD.
-  --kmers-orphans             Check if any mapping kmer exist for a mate, if there exists mapping for the other read (default false)
-  --bed-format                Dump output to bed.
-  --use-chr                   use chromosomes as virtual color.
-  --tn5-shift BOOLEAN         Tn5 shift
-  --no-poison BOOLEAN [1]     Do not filter reads for poison k-mers, even if a poison table exists for the index
-  -c,--struct-constraints     Apply structural constraints when performing mapping
-  --skipping-strategy TEXT [permissive]
-                              Which skipping rule to use for pseudoalignment ({strict, permissive, strict})
-  --quiet                     Try to be quiet in terms of console output
-  --thr FLOAT [0.7]           threshold for psa
-  --bin-size UINT [1000]      size for binning
-  --bin-overlap UINT [300]    size for bin overlap
-  --check-ambig-hits          check the existence of highly-frequent hits in mapped targets, rather than ignoring them.
+  -t, --threads <THREADS>                      number of threads to use [default: 16]
+  -o, --output <OUTPUT>                        path to output directory
+      --ignore-ambig-hits                      skip checking of the equivalence classes of k-mers that were too ambiguous to be otherwise considered (passing this flag can speed up mapping slightly, but may
+                                               reduce specificity)
+      --no-poison                              do not consider poison k-mers, even if the underlying index contains them. In this case, the mapping results will be identical to those obtained as if no poison
+                                               table was added to the index
+  -c, --struct-constraints                     apply structural constraints when performing mapping
+      --skipping-strategy <SKIPPING_STRATEGY>  the skipping strategy to use for k-mer collection [default: permissive] [possible values: permissive, strict]
+      --sam-format                             output mappings in sam format
+      --bed-format                             output mappings in bed format
+      --use-chr                                use chromosomes as color
+      --thr <THR>                              threshold to be considered for pseudoalignment, default set to 0.7 [default: 0.7]
+      --bin-size <BIN_SIZE>                    size of virtual color, default set to 1000 [default: 1000]
+      --bin-overlap <BIN_OVERLAP>              size for bin overlap, default set to 300 [default: 300]
+      --no-tn5-shift                           do not apply Tn5 shift to mapped positions
+      --check-kmer-orphan                      Check if any mapping kmer exist for a mate which is not mapped, but there exists mapping for the other read. If set to true and a mapping kmer exists, then the
+                                               pair would not be mapped (default false)
+  -h, --help                                   Print help
+  -V, --version                                Print version
+
+Input:
+  -i, --index <INDEX>      input index prefix
+  -1, --read1 <READ1>      path to a ',' separated list of read 1 files
+  -2, --read2 <READ2>      path to a ',' separated list of read 2 files
+  -r, --reads <READS>
+  -b, --barcode <BARCODE>  path to a ',' separated list of read 2 files
 ```
 All the arguments are self explanatory. It outputs the file `map.rad` in the `--output` directory.
 
-#### Barcode correction, Collate and Deduplicate
+#### Barcode correction and sorting
 ---
-These steps are handled by `alevin-fry`. It starts with taking in the RAD file that contains the mapping information and producing a BED file with the mapped fragments. The executable is `alevin_fry_atac` under `alevin-fry/target/release` directory.
+These steps are handled by `alevin-fry`. It starts by taking in the RAD file containing the mapping information and producing a BED file with the mapped fragments. The executable is `alevin_fry_atac` under the `alevin-fry/target/release` directory.
 ```
   Usage: alevin_fry_atac <COMMAND>
   Commands:
     generate-permit-list  Generate a permit list of barcodes from a whitelist file
-    collate               Collate a RAD file by corrected cell barcode
+    collate               Collate a RAD file with corrected cell barcode
+    sort                  Produce coordinate sorted bed file
     deduplicate           Deduplicate the RAD file and output a BED file
     help                  Print this message or the help of the given subcommand(s)
 ```
@@ -126,26 +124,15 @@ Options:
 `unfiltered-pl` is the permit list of the barcodes which will be a superset of the barcodes in a sample
 `--rev-comp` Whether the reverse complement has to be taken before trying to find a matching between the barcode of a mapped record to that of the barcode in the whitelist file
 
-##### Collate
+##### Sort
 ```
-Usage: alevin_fry_atac collate --input-dir <INPUTDIR> --rad-dir <RADDIR>
+Usage: alevin_fry_atac sort --input-dir <INPUTDIR> --rad-dir <RADDIR>
 Options:
-  -i, --input-dir <INPUTDIR>      output directory made by `generate-permit-list`
-  -r, --rad-dir <RADDIR>          the directory containing the map.rad file which will be collated (typically produced as an output of the mapping)
-  -t, --threads <THREADS>         number of threads to use for processing [default: 8]
-  -c, --compress                  compress the output collated RAD file
+  -i, --input-dir <INPUTDIR>      output directory made by generate-permit-list
+  -r, --rad-dir <RADDIR>          the directory containing the map.rad file which will be sorted (typically produced as an output of the mapping)
+  -t, --threads <THREADS>         number of threads to use for processing [default: 4]
+  -c, --compress                  compress the output of the sorted RAD file
   -m, --max-records <MAXRECORDS>  the maximum number of read records to keep in memory at once [default: 30000000]
   -h, --help                      Print help
   -V, --version                   Print version
-```
-
-##### Deduplicate
-```
-Usage: alevin_fry_atac deduplicate --input-dir <INPUTDIR>
-Options:
-  -i, --input-dir <INPUTDIR>          input directory made by generate-permit-list that also contains the output of collate
-  -t, --threads <THREADS>             number of threads to use for processing [default: 8]
-  -r, --rev-comp <REVERSECOMPLEMENT>  reverse complement [default: true] [possible values: true, false]
-  -h, --help                          Print help
-  -V, --version                       Print version
 ```
