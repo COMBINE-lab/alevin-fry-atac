@@ -18,6 +18,8 @@ out_dir_k_m_rem = join(out_dir_k_m, f"bin-size={bin_size}_thr={thr}")
 out_rad = join(out_dir_k_m_rem, "map.rad")
 out_bed = join(out_dir_k_m_rem, "map.bed")
 
+piscem_exec_path = join(config["piscem_path"], "target", "release", "piscem")
+
 rule all:
     input:
         f"{afa_ind_pref}.sshash",
@@ -33,7 +35,7 @@ rule run_afa_index:
         ind_pref = afa_ind_pref,
         k = k,
         m = m,
-        piscem_exec_path = join(config["piscem_path"], "target", "release", "piscem"),
+        piscem_exec_path = piscem_exec_path,
         tmpdir = join(config["tmp_dir"], f"k{k}_m{m}"),
         threads = threads
     shell:
@@ -59,7 +61,7 @@ rule run_afa_map:
         out_rad
     params:
         threads = threads,
-        piscem_exec_path = config["piscem_atac_path"],
+        piscem_exec_path = piscem_exec_path,
         ind_pref = afa_ind_pref,
         k = k,
         m = m,
@@ -69,7 +71,7 @@ rule run_afa_map:
         out_dir = out_dir_k_m_rem
     shell:
         """
-            {params.piscem_exec_path} \
+            {params.piscem_exec_path} map-sc-atac \
                 --index {params.ind_pref} \
                 --read1 {input.read1} \
                 --read2 {input.read2} \
@@ -89,7 +91,7 @@ rule run_afa_dedup:
     params:
         map_dir = out_dir_k_m_rem,
         threads = threads,
-        afa_dedup_path = config["afa_dedup_path"],
+        afa_dedup_path = config["afa_path"],
         permit_list_path = config["permit_list_path"],
         piscem_exec_path = join(config["piscem_path"], "target", "release", "piscem"),
         rev_comp = config["rev_comp"]

@@ -14,13 +14,8 @@ $piscem_executable generate-permit-list \
     --rev-comp $rev_comp \
     --output-dir $output_path
 
-echo "Collation"
-$piscem_executable collate \
+echo "Sort"
+$piscem_executable sort \
     --input-dir $output_path \
     --rad-dir $output_path \
     --threads $threads
-
-$piscem_executable deduplicate \
-    --input-dir $output_path \
-    --threads $threads \
-    --rev-comp $rev_comp
