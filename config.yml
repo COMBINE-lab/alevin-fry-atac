@@ -2,7 +2,7 @@
 piscem_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/piscem_combine"
 
 ### afa path
-afa_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/alevin-fry/target/release/alevin_fry_atac"
+afa_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/alevin-fry/target/release/alevin-fry"
 
 ### Reference
 ref_genome: "/fs/nexus-projects/scATAC-seq/reference/GRCh38-2020-A-build/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
