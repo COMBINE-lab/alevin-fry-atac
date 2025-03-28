@@ -17,7 +17,7 @@ While we provide below individually a list of steps to run `alevin-fry-atac` to 
 
 #### alevin-fry-atac (dev-atac)
 ```
-    git clone https://github.com/COMBINE-lab/alevin-fry.git -b dev-atac
+    git clone https://github.com/COMBINE-lab/alevin-fry.git
     cd alevin-fry
     git branch ## check it is the dev-atac branch
     cargo build --release
@@ -99,9 +99,9 @@ All the arguments are self explanatory. It outputs the file `map.rad` in the `--
 
 #### Barcode correction and sorting
 ---
-These steps are handled by `alevin-fry`. It starts by taking in the RAD file containing the mapping information and producing a BED file with the mapped fragments. The executable is `alevin_fry_atac` under the `alevin-fry/target/release` directory.
+These steps are handled by `alevin-fry` with `atac` argument. It starts by taking in the RAD file containing the mapping information and producing a BED file with the mapped fragments. The executable is `alevin-fry` under the `alevin-fry/target/release` directory.
 ```
-  Usage: alevin_fry_atac <COMMAND>
+  Usage: alevin-fry atac <COMMAND>
   Commands:
     generate-permit-list  Generate a permit list of barcodes from a whitelist file
     collate               Collate a RAD file with corrected cell barcode
@@ -111,7 +111,7 @@ These steps are handled by `alevin-fry`. It starts by taking in the RAD file con
 ```
 ##### Barcode correction
 ```
-Usage:  alevin_fry_atac generate-permit-list --input <INPUT> --output-dir <OUTPUTDIR> <--unfiltered-pl <UNFILTEREDPL>>
+Usage:  alevin_fry atac generate-permit-list --input <INPUT> --output-dir <OUTPUTDIR> <--unfiltered-pl <UNFILTEREDPL>>
 Options:
   -i, --input <INPUT>                 input directory containing the map.rad file
   -o, --output-dir <OUTPUTDIR>        output directory
@@ -126,7 +126,7 @@ Options:
 
 ##### Sort
 ```
-Usage: alevin_fry_atac sort --input-dir <INPUTDIR> --rad-dir <RADDIR>
+Usage: alevin-fry atac sort --input-dir <INPUTDIR> --rad-dir <RADDIR>
 Options:
   -i, --input-dir <INPUTDIR>      output directory made by generate-permit-list
   -r, --rad-dir <RADDIR>          the directory containing the map.rad file which will be sorted (typically produced as an output of the mapping)
