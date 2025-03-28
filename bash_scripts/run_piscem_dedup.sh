@@ -8,14 +8,14 @@ threads=$5
 output_path=$6
 
 echo "Correcting barcodes"
-$piscem_executable generate-permit-list \
+$piscem_executable atac generate-permit-list \
     --input $map_rad \
     --unfiltered-pl $whitelist_file \
     --rev-comp $rev_comp \
     --output-dir $output_path
 
 echo "Sort"
-$piscem_executable sort \
+$piscem_executable atac sort \
     --input-dir $output_path \
     --rad-dir $output_path \
     --threads $threads
