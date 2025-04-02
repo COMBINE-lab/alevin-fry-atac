@@ -1,0 +1,128 @@
+from os.path import join
+import yaml
+if not workflow.overwrite_configfiles:
+    configfile: "config.yml"
+
+k = config["k"]
+m = config["m"]
+thr = config["threshold"]
+bin_size = config["bin_size"]
+threads =config["threads"]
+afa_output_path = config["out_path"]
+
+afa_ind_path = join(afa_output_path, "index")
+afa_ind_pref = join(afa_ind_path, f"k={k}_m={m}")
+
+map_output_path = join(afa_output_path, "map_output")
+out_dir_k_m = join(map_output_path, f"k{k}_m_{m}")
+out_dir_k_m_rem = join(out_dir_k_m, f"bin-size={bin_size}_thr={thr}")
+out_rad = join(out_dir_k_m_rem, "map.rad")
+out_bed = join(out_dir_k_m_rem, "map.bed")
+
+piscem_exec_path = join(config["piscem_path"], "target", "release", "piscem")
+afa_exec_path = join(config["afa_path"], "target", "release", "alevin-fry")
+
+rule all:
+    input:
+        f"{afa_ind_pref}.sshash",
+        out_rad,
+        out_bed
+
+rule run_afa_index:
+    input:
+        config["ref_genome"]
+    output:
+        [f"{afa_ind_pref}{x}" for x in [".sshash", ".ectab", ".ctab", ".refinfo", "_cfish.json"]]
+    params:
+        ind_pref = afa_ind_pref,
+        k = k,
+        m = m,
+        piscem_exec_path = piscem_exec_path,
+        tmpdir = join(config["tmp_dir"], f"k{k}_m{m}"),
+        threads = threads
+    shell:
+        """
+            export TMPDIR={params.tmpdir}
+	    mkdir -p {params.tmpdir}
+            ulimit -n 2048
+            {params.piscem_exec_path} build \
+                -s {input} \
+                -k {params.k} \
+                -m {params.m} \
+                -t {params.threads} \
+                -o {params.ind_pref} \
+                -w {params.tmpdir} \
+                --overwrite
+        """
+
+rule run_afa_map:
+    input:
+        read1 = config["read1"],
+        read2 = config["read2"],
+        barcode = config["barcode"]
+    output:
+        out_rad
+    params:
+        threads = threads,
+        piscem_exec_path = piscem_exec_path,
+        ind_pref = afa_ind_pref,
+        k = k,
+        m = m,
+        thr = thr,
+        bin_size = bin_size,
+        use_chr = lambda wildcards: "--use-chr" if bin_size == "use_chr" else "",
+        out_dir = out_dir_k_m_rem
+    shell:
+        """
+            mkdir -p {params.out_dir}
+            {params.piscem_exec_path} map-sc-atac \
+                --index {params.ind_pref} \
+                --read1 {input.read1} \
+                --read2 {input.read2} \
+                --barcode {input.barcode} \
+                --output {params.out_dir} \
+                --thr {params.thr} \
+                --threads {params.threads} \
+                {params.use_chr} \
+                --bin-size {params.bin_size}
+        """
+
+rule run_afa_gpm:
+    input:
+        rules.run_afa_map.output
+    output:
+        join(out_dir_k_m_rem, "generate_permit_list.json")
+    params:
+        map_dir = out_dir_k_m_rem,
+        threads = threads,
+        afa_exec_path = afa_exec_path,
+        permit_list_path = config["permit_list_path"]
+    shell:
+        """
+		{params.afa_exec_path} atac \
+           	generate-permit-list \
+                --input {params.map_dir} \
+                --output-dir {params.map_dir} \
+                --threads {params.threads} \
+                --unfiltered-pl {params.permit_list_path}
+
+        """
+
+rule run_afa_sort:
+    input:
+        rules.run_afa_gpm.output
+    output:
+        out_bed
+    params:
+        map_dir = out_dir_k_m_rem,
+        threads = threads,
+        afa_exec_path = afa_exec_path,
+    shell:
+        """
+            {params.afa_exec_path} atac \
+                sort \
+                -i {params.map_dir} \
+		-r {params.map_dir} \
+               	--threads {params.threads}
+
+        """

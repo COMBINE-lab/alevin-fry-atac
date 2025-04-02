@@ -1,0 +1,26 @@
+### Path to software
+piscem_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/piscem_combine"
+
+### afa path
+afa_path: "/fs/cbcb-lab/rob/students/noor/Atacseq/alevin-fry"
+
+### Reference
+ref_genome: "data/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
+
+### Piscem parameters
+k: 25
+m: 17
+tmp_dir: "/scratch0"
+threads: 16
+threshold: 0.7
+bin_size: 1000
+permit_list_path: "data/737K-cratac-v1.txt"
+rev_comp: true
+
+### fastq files
+read1: "data/chr10_R1.fq.gz"
+read2: "data/chr10_R3.fq.gz"
+barcode: "data/chr10_R2.fq.gz"
+
+### output
+out_path: "out_data"
