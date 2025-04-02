@@ -19,6 +19,7 @@ out_rad = join(out_dir_k_m_rem, "map.rad")
 out_bed = join(out_dir_k_m_rem, "map.bed")
 
 piscem_exec_path = join(config["piscem_path"], "target", "release", "piscem")
+afa_exec_path = join(config["afa_path"], "target", "release", "alevin-fry")
 
 rule all:
     input:
@@ -41,6 +42,7 @@ rule run_afa_index:
     shell:
         """
             export TMPDIR={params.tmpdir}
+            mkdir -p {params.tmpdir}   
             ulimit -n 2048
             {params.piscem_exec_path} build \
                 -s {input} \
@@ -71,6 +73,7 @@ rule run_afa_map:
         out_dir = out_dir_k_m_rem
     shell:
         """
+            mkdir -p {params.out_dir}
             {params.piscem_exec_path} map-sc-atac \
                 --index {params.ind_pref} \
                 --read1 {input.read1} \
@@ -82,24 +85,42 @@ rule run_afa_map:
                 {params.use_chr} \
                 --bin-size {params.bin_size}
         """
-
-rule run_afa_dedup:
+rule run_afa_gpm:
     input:
         rules.run_afa_map.output
+    output:
+        join(out_dir_k_m_rem, "generate_permit_list.json")
+    params:
+        map_dir = out_dir_k_m_rem,
+        threads = threads,
+        afa_exec_path = afa_exec_path,
+        permit_list_path = config["permit_list_path"]
+    shell:
+        """
+		{params.afa_exec_path} atac \
+           	generate-permit-list \
+                --input {params.map_dir} \
+                --output-dir {params.map_dir} \
+                --threads {params.threads} \
+                --unfiltered-pl {params.permit_list_path}
+
+        """
+
+rule run_afa_sort:
+    input:
+        rules.run_afa_gpm.output
     output:
         out_bed
     params:
         map_dir = out_dir_k_m_rem,
         threads = threads,
-        afa_dedup_path = config["afa_path"],
-        permit_list_path = config["permit_list_path"],
-        piscem_exec_path = join(config["piscem_path"], "target", "release", "piscem"),
-        rev_comp = config["rev_comp"]
+        afa_exec_path = afa_exec_path,
     shell:
         """
-		./bash_scripts/run_piscem_dedup.sh \
-            	{params.afa_dedup_path} \
-                {params.map_dir} {params.permit_list_path} \
-                {params.rev_comp} {params.threads} {params.map_dir}
-        """
+            {params.afa_exec_path} atac \
+                sort \
+                -i {params.map_dir} \
+		-r {params.map_dir} \
+               	--threads {params.threads}
 
+        """
