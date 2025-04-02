@@ -6,7 +6,24 @@ alevin-fry-atac is a suite of tools for the rapid, accurate and memory-frugal pr
 We recommend running `alevin-fry-atac` using [simpleaf](https://github.com/COMBINE-lab/simpleaf) 
 
 ## Getting started
-While we provide below individually a list of steps to run `alevin-fry-atac` to get the deduplicated bed file containing the mapped fragments, we also provide a Snakefile that does these things for you. Alevin-fry-atac is now integrated into the [simpleaf](https://github.com/COMBINE-lab/simpleaf) workflow and provides a one-step command to process single-cell ATAC-seq data.
+While we provide below individually a list of steps to run `alevin-fry-atac` to get the deduplicated bed file containing the mapped fragments, we also provide a Snakefile that does these things for you. Alevin-fry-atac is also now integrated into the [simpleaf](https://github.com/COMBINE-lab/simpleaf) workflow and provides a one-step command to process single-cell ATAC-seq data.
+
+### Running Snakefile
+```
+  snakefile -j 1 --configfile config.yml
+```
+
+Alternatively (also recommended) use simpleaf
+### Simpleaf 
+#### index
+```
+export ALEVIN_FRY_HOME=/fs/cbcb-lab/rob/students/noor/Atacseq/alevin-fry ## Path for alevin-fry
+Usage: simpleaf atac index [OPTIONS] --input <INPUT> --output <OUTPUT>
+```
+#### Process
+```
+Usage: simpleaf atac process [OPTIONS] --index <INDEX> --barcode-reads <BARCODE_READS> --chemistry <CHEMISTRY> --output <OUTPUT>
+```
 
 ### Software to install
 
