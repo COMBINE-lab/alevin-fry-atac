@@ -5,3 +5,6 @@
 ##### Decompress
 ```unzip example_data.zip```
 ```unzip example_out.zip```
+
+#### Running the toy example
+```snakemake -j1 --configfile config.yml```
